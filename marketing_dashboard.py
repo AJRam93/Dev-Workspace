@@ -12,14 +12,15 @@ st.set_page_config(
     page_title="Marketing Performance Dashboard",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={}
 )
 
 # ─────────────────────────────────────────
 # THEME / COLORS
 # ─────────────────────────────────────────
 CHANNEL_COLORS = {
-    "Google Ads":   "#1A3C5E",
+    "Google Ads":   "#3D76AF",
     "Email":        "#0F6E56",
     "Meta Ads":     "#EF9F27",
     "LinkedIn Ads": "#7F77DD",
@@ -28,7 +29,7 @@ CHANNEL_COLORS = {
 NAVY   = "#1A3C5E"
 GREEN  = "#0F6E56"
 GRAY   = "#6B7A8D"
-BG     = "#F0F4F8"
+BG     = "#E9A107"
 
 # ─────────────────────────────────────────
 # CUSTOM CSS
@@ -43,6 +44,19 @@ st.markdown("""
     [data-testid="stSidebar"] * { color: white !important; }
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stMultiSelect label { color: #CBD5E1 !important; font-size: 13px; }
+
+    /* Sidebar toggle button */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        color: #1A3C5E !important;
+        background-color: white !important;
+        border-radius: 0 6px 6px 0 !important;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
+    }
+    [data-testid="collapsedControl"] svg {
+        fill: #1A3C5E !important;
+    }
 
     /* Metric cards */
     [data-testid="metric-container"] {
@@ -279,17 +293,19 @@ with col_a:
         labels={"Ad_Spend": "Ad Spend ($)", "Channel": ""}
     )
     fig_spend.update_traces(
-        texttemplate="$%{text:,.0f}", textposition="outside",
-        marker_line_width=0
-    )
+    texttemplate="$%{text:,.0f}", textposition="outside",
+    marker_line_width=0,
+    textfont=dict(color="#1E293B", size=11)
+)
+    
     fig_spend.update_layout(
         showlegend=False, plot_bgcolor="white", paper_bgcolor="white",
         xaxis=dict(showgrid=show_gridlines, showticklabels=False, title=""),
-        yaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False, tickfont=dict(color= "#080808", size=12)),
         margin=dict(l=0, r=60, t=40, b=0),
-        title_font=dict(size=14, color=NAVY)
+        title_font=dict(size=14, color="#1E293B")
     )
-    st.plotly_chart(fig_spend, use_container_width=True)
+    st.plotly_chart(fig_spend, width="stretch")
 
 with col_b:
     # Filter out Email outlier for readability (show as annotation instead)
@@ -305,18 +321,20 @@ with col_b:
         labels={"ROAS": "Return on Ad Spend", "Channel": ""}
     )
     fig_roas.update_traces(
-        texttemplate="%{text:.1f}x", textposition="outside",
-        marker_line_width=0
-    )
+    texttemplate="%{text:.1f}x", textposition="outside",
+    marker_line_width=0,
+    textfont=dict(color="#1E293B", size=11)
+)
+    
     fig_roas.update_layout(
         showlegend=False, plot_bgcolor="white", paper_bgcolor="white",
         xaxis=dict(showgrid=show_gridlines, showticklabels=False, title=""),
-        yaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False,tickfont=dict(color="#080808",size=12)),
         margin=dict(l=0, r=60, t=40, b=0),
         title_font=dict(size=14, color=NAVY)
     )
-    st.plotly_chart(fig_roas, use_container_width=True)
-    st.caption(f"💡 Email excluded — ROAS of **{email_roas:.1f}x** would compress all other bars")
+    st.plotly_chart(fig_roas, width="stretch")
+    st.markdown(f"<p style='font-size:12px; color:#1E293B;'>💡 Email excluded — ROAS of <strong>{email_roas:.1f}x</strong> would compress all other bars</p>", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────
@@ -351,30 +369,47 @@ with col_c:
     fig_trend.add_trace(
         go.Scatter(
             x=monthly_total["Month"], y=monthly_total["Conversions"],
-            name="Conversions", line=dict(color=GREEN, width=3),
+            name="Conversions", line=dict(color="#4ADDB8", width=3),
             mode="lines+markers", marker=dict(size=6),
             hovertemplate="<b>%{x|%b %Y}</b><br>Conversions: %{y:,.0f}<extra></extra>"
         ),
         secondary_y=True
     )
     fig_trend.update_layout(
-        title="Monthly Spend vs Conversions",
+        title="Monthly Spend    vs Conversions",
         plot_bgcolor="white", paper_bgcolor="white",
-        legend=dict(orientation="h", y=1.12, x=0),
-        margin=dict(l=0, r=0, t=50, b=0),
+        legend=dict(
+            orientation="v",
+            x=1.08,
+            y=1,
+            font=dict(color="#1E293B", size=12),
+            bgcolor="white",
+            bordercolor="#E2E8F0",
+            borderwidth=1
+        ),
+        margin=dict(l=0, r=120, t=50, b=80),
         hovermode="x unified",
         title_font=dict(size=14, color=NAVY)
     )
     fig_trend.update_yaxes(
         title_text="Ad Spend ($)", secondary_y=False,
-        showgrid=show_gridlines, gridcolor="#F0F0F0"
+        showgrid=show_gridlines, gridcolor="#F0F0F0",
+        title_font=dict(color="#1E293B"),
+        tickfont=dict(color="#1E293B")
     )
     fig_trend.update_yaxes(
         title_text="Conversions", secondary_y=True,
-        showgrid=False, title_font=dict(color=GREEN)
+        showgrid=False,
+        title_font=dict(color="#1E293B"),
+        tickfont=dict(color="#1E293B")
     )
-    st.plotly_chart(fig_trend, use_container_width=True)
-
+    fig_trend.update_xaxes(
+        tickfont=dict(color="#1E293B", size=11),
+        tickangle=-45,
+        showgrid=False,
+        tickformat="%b %Y"
+    )
+    st.plotly_chart(fig_trend, width="stretch")
 with col_d:
     conv_by_channel = (
         filtered.groupby("Channel")["Conversions"].sum().reset_index()
@@ -386,15 +421,21 @@ with col_d:
     )
     fig_donut.update_traces(
         textposition="inside", textinfo="percent",
+        textfont=dict(color="#F8F9FA",size=12),
         hovertemplate="<b>%{label}</b><br>%{value:,.0f} conversions<br>%{percent}<extra></extra>"
     )
     fig_donut.update_layout(
         plot_bgcolor="white", paper_bgcolor="white",
-        legend=dict(orientation="v", x=1, y=0.5),
+        legend=dict(
+            orientation="v",
+            x=1, y=0.5,
+            font=dict(color="#1E293B", size=12)
+        ),
         margin=dict(l=0, r=0, t=40, b=0),
-        title_font=dict(size=14, color=NAVY)
+        title_font=dict(size=14, color=NAVY),
+        font=dict(color="#1E293B")
     )
-    st.plotly_chart(fig_donut, use_container_width=True)
+    st.plotly_chart(fig_donut, width="stretch")
 
 
 # ─────────────────────────────────────────
@@ -432,7 +473,7 @@ display_table["ROAS"]         = display_table["ROAS"].apply(lambda x: f"{x:.1f}x
 
 st.dataframe(
     display_table,
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
     column_config={
         "Campaign":    st.column_config.TextColumn(width="medium"),
@@ -465,26 +506,36 @@ colors  = [NAVY, GREEN, "#EF9F27"]
 
 for metric, color in zip(metrics, colors):
     fig_eff.add_trace(go.Bar(
-        name=metric,
-        x=eff_channel["Channel"],
-        y=eff_channel[metric],
-        marker_color=color,
-        text=eff_channel[metric] if show_data_labels else None,
-        texttemplate="%{text:.1f}",
-        textposition="outside"
-    ))
+    name=metric,
+    x=eff_channel["Channel"],
+    y=eff_channel[metric],
+    marker_color=color,
+    text=eff_channel[metric] if show_data_labels else None,
+    texttemplate="%{text:.1f}",
+    textposition="outside",
+    textfont=dict(color="#1E293B", size=11)
+))
 
 fig_eff.update_layout(
     title="Efficiency Metrics by Channel (CTR %, CVR %, ROAS)",
     barmode="group",
     plot_bgcolor="white", paper_bgcolor="white",
-    legend=dict(orientation="h", y=1.12),
-    xaxis=dict(showgrid=False),
-    yaxis=dict(showgrid=show_gridlines, gridcolor="#F0F0F0"),
-    margin=dict(l=0, r=0, t=50, b=0),
-    title_font=dict(size=14, color=NAVY)
+    legend=dict(
+        orientation="v",
+        x=1.02,
+        y=1,
+        font=dict(color="#1E293B", size=12),
+        bgcolor="white",
+        bordercolor="#E2E8F0",
+        borderwidth=1
+    ),
+    xaxis=dict(showgrid=False, tickfont=dict(color="#1E293B", size=12)),
+    yaxis=dict(showgrid=show_gridlines, gridcolor="#F0F0F0", tickfont=dict(color="#1E293B", size=12)),
+    margin=dict(l=0, r=120, t=50, b=0),
+    title_font=dict(size=14, color=NAVY),
+    font=dict(color="#1E293B")
 )
-st.plotly_chart(fig_eff, use_container_width=True)
+st.plotly_chart(fig_eff, width="stretch")
 
 
 # ─────────────────────────────────────────
@@ -624,7 +675,7 @@ if "rec_text" not in st.session_state:
 
 col_btn, col_note = st.columns([1, 3])
 with col_btn:
-    generate = st.button("⚡ Generate Recommendations", type="primary", use_container_width=True)
+    generate = st.button("⚡ Generate Recommendations", type="primary", width="stretch")
 with col_note:
     st.caption("Powered by Claude AI · Updates when you change filters and regenerate · ~5 seconds")
 
